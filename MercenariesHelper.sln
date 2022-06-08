@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercenariesHelper", "Hearthstone\MercenariesHelper.csproj", "{0BF30DC4-2E3D-4D24-94B5-8C26541DD7D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D880468-2644-4284-80C1-77B17454C97D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0BF30DC4-2E3D-4D24-94B5-8C26541DD7D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BF30DC4-2E3D-4D24-94B5-8C26541DD7D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BF30DC4-2E3D-4D24-94B5-8C26541DD7D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BF30DC4-2E3D-4D24-94B5-8C26541DD7D6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {70A29E20-0B23-4E51-B7A6-DC360FA3F5FA}
+	EndGlobalSection
+EndGlobal
