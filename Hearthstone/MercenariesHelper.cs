@@ -1027,6 +1027,8 @@ namespace MercenariesHelper
                         {
                             StrategyRun = true;
                             StrategyAsync(Entrance);
+                            battles.Ability = null;
+                            battles.target = null;
                             //Entrance.Invoke(StrategyInstance, new object[] { });
                             return;
                         }
@@ -1039,6 +1041,8 @@ namespace MercenariesHelper
                             int SelectedOption = 1;
                             if (EntranceQueue.Count > 0)
                             {
+                                battles.Ability = null;
+                                battles.target = null;
                                 //Debug.Log("EntranceQueue数量：" + EntranceQueue.Count);
                                 Entity entity = EntranceQueue.Dequeue();
                                 //Debug.Log(entity);
@@ -1110,17 +1114,7 @@ namespace MercenariesHelper
                             }
                             catch
                             {
-                                try
-                                {
-                                    Type type = typeof(InputManager);
-                                    var m = type.GetMethod("HandleClickOnCardInBattlefield", BindingFlags.NonPublic | BindingFlags.Instance);
-                                    m.Invoke(InputManager.Get(), new object[] { battles.Ability, true });
-                                }
-                                catch
-                                {
                                     Debug.Log("Ability：" + battles.Ability);
-                                }
-                                
                             }
                         }
                         if (battles.target == null)
@@ -1192,7 +1186,7 @@ namespace MercenariesHelper
                 //    return;
                 //}
                 List<Card> card = ChoiceCardMgr.Get().GetFriendlyCards();
-                InputManager.Get().HandleClickOnSubOption(card[card.Count - 1].GetEntity());
+                InputManager.Get().HandleClickOnSubOption(card[card.Count - 1].GetEntity());    //抉择倒数第1个
                 Resetidle();   //重置空闲时间
                 return;
                 //}

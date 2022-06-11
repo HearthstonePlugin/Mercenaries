@@ -22,9 +22,10 @@ public class Strategy
             TeamConifg += "凯恩·血蹄-321-220\n";
             TeamConifg += "迪亚波罗-231-200-001\n";
             TeamConifg += "希奈丝特拉-231-110\n";
-            TeamConifg += "# 优先目标，如果有则覆盖默认策略，当技能指向为2时，忽略执行。以>开头填写，无空格\n";
+            TeamConifg += "# 优先目标，如果有则覆盖默认策略，当技能指向为0时，执行。以>开头填写，无空格\n";
             TeamConifg += ">玛法里奥·怒风\n";
             TeamConifg += ">冰雪之王洛克霍拉\n";
+            TeamConifg += ">鞭笞者特里高雷\n";
             TeamConifg += ">拉格纳罗斯\n";
             TeamConifg += ">萨尔\n";
             TeamConifg += ">巴琳达·斯通赫尔斯\n";
