@@ -1025,10 +1025,11 @@ namespace MercenariesHelper
                     {
                         if (StrategyOK && EntranceQueue.Count == 0 && HandleQueueOK)         //如果加载了策略则调用策略处理登场人物
                         {
-                            StrategyRun = true;
-                            StrategyAsync(Entrance);
                             battles.Ability = null;
                             battles.target = null;
+                            BattleQueue.Clear();
+                            StrategyRun = true;
+                            StrategyAsync(Entrance);
                             //Entrance.Invoke(StrategyInstance, new object[] { });
                             return;
                         }
@@ -1043,6 +1044,7 @@ namespace MercenariesHelper
                             {
                                 battles.Ability = null;
                                 battles.target = null;
+                                BattleQueue.Clear();
                                 //Debug.Log("EntranceQueue数量：" + EntranceQueue.Count);
                                 Entity entity = EntranceQueue.Dequeue();
                                 //Debug.Log(entity);

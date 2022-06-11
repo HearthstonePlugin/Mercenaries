@@ -9,6 +9,8 @@ public class Strategy
     private List<string> AttackStrategy = new List<string>();
     private List<string> FirstAttack = new List<string>();
     private List<string> heroNames = new List<string>();
+    private List<string> FirstHeroNames = new List<string>();
+    private List<string> ignoreNames = new List<string>();
     private void InitTeamConifg()
     {
         string teamConfigPath = @"BepInEx\config\MercenaryTeam.cfg";
@@ -22,6 +24,10 @@ public class Strategy
             TeamConifg += "凯恩·血蹄-321-220\n";
             TeamConifg += "迪亚波罗-231-200-001\n";
             TeamConifg += "希奈丝特拉-231-110\n";
+            TeamConifg += "# 优先技能英雄，同速先发，仅支持设置一个\n";
+            TeamConifg += "+瓦尔登·晨拥\n";
+            TeamConifg += "# 忽略上场（跳过衍生物）\n";
+            TeamConifg += "-小型魔像\n";
             TeamConifg += "# 优先目标，如果有则覆盖默认策略，当技能指向为0时，执行。以>开头填写，无空格\n";
             TeamConifg += ">玛法里奥·怒风\n";
             TeamConifg += ">冰雪之王洛克霍拉\n";
@@ -47,6 +53,16 @@ public class Strategy
             if (line[0] == '>')
             {
                 FirstAttack.Add(line.Substring(1));
+                continue;
+            }
+            if (line[0] == '+')
+            {
+                FirstHeroNames.Add(line.Substring(1));
+                continue;
+            }
+            if (line[0] == '-')
+            {
+                ignoreNames.Add(line.Substring(1));
                 continue;
             }
             string[] lineSplit = line.Split('-'); // 分割配置
@@ -80,6 +96,10 @@ public class Strategy
 
             foreach (string hero in heroNames)
             {
+                foreach(string ignoreName in ignoreNames)
+                {
+                    if (ignoreName == hero) goto tagContinue;
+                }
                 foreach (Card card in zoneHand.GetCards())
                 {
                     if (hero == card.GetEntity().GetName())
@@ -92,6 +112,8 @@ public class Strategy
                         return;
                     }
                 }
+            tagContinue:
+                continue;
             }
         }
     }
@@ -103,12 +125,55 @@ public class Strategy
         ZonePlay friendlyZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.FRIENDLY);
         MercenariesHelper.MercenariesHelper.Battles battles = new MercenariesHelper.MercenariesHelper.Battles();
 
+        if (FirstHeroNames.Count != 0)
+        {
+            foreach (Card card in friendlyZone.GetCards())
+            {
+                string firendlyCardName = card.GetEntity().GetName();
+                if (firendlyCardName == FirstHeroNames[0])
+                {
+                    for (int i = 0; i < heroNames.Count; i++)
+                    {
+                        if (heroNames[i] == FirstHeroNames[0])
+                        {
+                            if (i==0)
+                            {
+                                goto findFirstHero;
+                            }
+
+                            string tempAttackAbility = AttackAbility[i];
+                            string tempAbilityTargetType = AbilityTargetType[i];
+                            string tempAttackStrategy = AttackStrategy[i];
+                            bool tempAttackTaunt = AttackTaunt[i];
+                            
+                            AttackAbility[i] = AttackAbility[0];
+                            AbilityTargetType[i] = AbilityTargetType[0];
+                            AttackStrategy[i] = AttackStrategy[0];
+                            AttackTaunt[i] = AttackTaunt[0];
+                            heroNames[i] = heroNames[0];
+
+                            AttackAbility[0] = tempAttackAbility;
+                            AbilityTargetType[0] = tempAbilityTargetType;
+                            AttackStrategy[0] = tempAttackStrategy;
+                            AttackTaunt[0] = tempAttackTaunt;
+                            heroNames[0] = FirstHeroNames[0];
+
+                            goto findFirstHero;
+                        }
+                    }
+                }
+            }
+
+        findFirstHero:
+            ;
+        }
+
         for (int i = 0; i < heroNames.Count; i++)
         {
             foreach (Card card in friendlyZone.GetCards())
             {
                 string firendlyCardName = card.GetEntity().GetName();
-                
+
                 if (firendlyCardName == heroNames[i])
                 {
                     List<int> lettuceAbilityEntityIDs = card.GetEntity().GetLettuceAbilityEntityIDs();
