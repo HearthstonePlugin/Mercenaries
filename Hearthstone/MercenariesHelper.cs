@@ -47,7 +47,9 @@ namespace MercenariesHelper
         public static BepInEx.Configuration.ConfigEntry<string> PVE策略;
         public static BepInEx.Configuration.ConfigEntry<long> 开始时间;
         public static BepInEx.Configuration.ConfigEntry<bool> Hidemain;
+        public static BepInEx.Configuration.ConfigEntry<int> 投降延迟;
         public static bool 认输;
+        public static int concedeDelay;
         public static bool isPVP;
         public static bool isViewCount;
         public static bool PVEMode;
@@ -141,10 +143,6 @@ namespace MercenariesHelper
             isPVP = PVP.Value;
             商店推销 = Config.Bind("配置", "商店推销", false, "false屏蔽商店推销");
             isViewCount = 商店推销.Value;
-            autoSwitch = Config.Bind("配置", "切换", false, "是否切换至PVE");
-            自动切换 = autoSwitch.Value;
-            SwitchLine = Config.Bind("配置", "切换线", 12000, "达到此分数时切换至PVE");
-            切换线 = SwitchLine.Value;
             PVE模式 = Config.Bind("配置", "PVE模式", true, "true任务模式 false刷图模式");
             PVEMode = PVE模式.Value;
             步数 = Config.Bind("配置", "步数", 2, "距离神秘选项怪物数，超过则重开地图。");
@@ -163,8 +161,15 @@ namespace MercenariesHelper
             onlyPC = 只打电脑.Value;
             autoConcede = Config.Bind("配置", "投降", false, "是否自动认输");
             认输 = autoConcede.Value;
+            投降延迟 = Config.Bind("配置", "投降延迟", 0, "投降延迟（毫秒）");
+            concedeDelay = 投降延迟.Value;
+
             Concedeline = Config.Bind("配置", "分数线", 6000, "自动认输分数线，高于此分数自动认输");
             分数线 = Concedeline.Value;
+            autoSwitch = Config.Bind("配置", "切换", false, "是否切换至PVE");
+            自动切换 = autoSwitch.Value;
+            SwitchLine = Config.Bind("配置", "切换线", 12000, "达到此分数时切换至PVE");
+            切换线 = SwitchLine.Value;
             开始时间 = Config.Bind("配置", "开始时间", 0L, "对局开始时间");
             StartTime = 开始时间.Value;
             //GetVer();   //对比sha1，不对则下载
@@ -855,7 +860,7 @@ namespace MercenariesHelper
                         else
                         {
                             if (GameState.Get().GetOpposingPlayers().Count == 1 && isPVP && onlyPC) { GameState.Get().Concede(); }
-                            if (认输 && isPVP && NetCache.Get().GetNetObject<NetCache.NetCacheMercenariesPlayerInfo>().PvpRating > 分数线) { GameState.Get().Concede(); }
+                            if (认输 && isPVP && NetCache.Get().GetNetObject<NetCache.NetCacheMercenariesPlayerInfo>().PvpRating > 分数线) {sleeptime+=concedeDelay/1000.0f; GameState.Get().Concede(); }
                             //if (GameUtils.CanConcedeCurrentMission() && isPVP ) {
                             //    投降时间 += 1;
                             //    //UnityEngine.Debug.Log("投降时间: " + 投降时间);
@@ -961,49 +966,11 @@ namespace MercenariesHelper
         private static void HandlePlay()
         {
             if (phaseID == 3) { return; }
-            //ZoneHand myHandZone = null;
-            //ZonePlay myPlayZone = null;
-            //ZonePlay enemyPlayZone = null;
 
-            //foreach (Zone zone in ZoneMgr.Get().GetZones())
-            //{
-            //    if (zone.m_Side == Player.Side.FRIENDLY)
-            //    {
-            //        if (zone is ZoneHand)
-            //        {
-            //            myHandZone = (ZoneHand)zone;
-            //        }
-            //        else if (zone is ZonePlay)
-            //        {
-            //            myPlayZone = (ZonePlay)zone;
-            //        }
-
-            //    }
-            //    else if (zone is ZonePlay)
-            //    {
-            //        enemyPlayZone = (ZonePlay)zone;
-            //    }
-            //}
-
-            //if (myPlayZone.GetCardCount() == 0 && myHandZone.GetCardCount() == 0 && enemyPlayZone.GetCardCount() == 0) { return; }
 
             if (GameState.Get().GetResponseMode() == GameState.ResponseMode.OPTION_TARGET)
             {
-                //if (phaseID == 2)
-                //{
-                //    if (StrategyOK)         //如果加载了策略则调用策略处理战斗过程
-                //    {
-                //        StrategyRun = true;
-                //        StrategyAsync(Battle);
-                //        //Battle.Invoke(StrategyInstance, new object[] { });
-                //        return;
-                //    }
-                //Vector3 vector = Camera.main.WorldToScreenPoint(enemyPlayZone.GetFirstCard().gameObject.transform.position);
-                //if (vector != null)
-                //{
-                //    clickqueue.Enqueue(new float[] { vector.x, vector.y });
-                //    return;
-                //}
+
                 if (battles.target != null)
                 {
                     //Debug.Log("target：" + battles.target);
@@ -1143,7 +1110,17 @@ namespace MercenariesHelper
                             }
                             catch
                             {
-                                Debug.Log("Ability：" + battles.Ability);
+                                try
+                                {
+                                    Type type = typeof(InputManager);
+                                    var m = type.GetMethod("HandleClickOnCardInBattlefield", BindingFlags.NonPublic | BindingFlags.Instance);
+                                    m.Invoke(InputManager.Get(), new object[] { battles.Ability, true });
+                                }
+                                catch
+                                {
+                                    Debug.Log("Ability：" + battles.Ability);
+                                }
+                                
                             }
                         }
                         if (battles.target == null)
