@@ -20,7 +20,7 @@ public class Strategy
             TeamConifg += "冰雪之王洛克霍拉-123-222\n";
             TeamConifg += "吉安娜·普罗德摩尔-213-000-101\n";
             TeamConifg += "凯恩·血蹄-321-220\n";
-            TeamConifg += "迪亚波罗-231-200\n";
+            TeamConifg += "迪亚波罗-231-200-001\n";
             TeamConifg += "希奈丝特拉-231-110\n";
             TeamConifg += "# 优先目标，如果有则覆盖默认策略，当技能指向为2时，忽略执行。以>开头填写，无空格\n";
             TeamConifg += ">玛法里奥·怒风\n";
@@ -72,6 +72,7 @@ public class Strategy
         //AbilityTargetType.ForEach(i => Console.Write("{0}\t", i));
         //AttackStrategy.ForEach(i => Console.Write("{0}\t", i));
         //AttackTaunt.ForEach(i => Console.Write("{0}\t", i));
+        MercenariesHelper.MercenariesHelper.BattleQueue.Clear();
         ZoneHand zoneHand = ZoneMgr.Get().FindZoneOfType<ZoneHand>(global::Player.Side.FRIENDLY);
         if (zoneHand != null)
         {
@@ -97,6 +98,7 @@ public class Strategy
     public void Combat()
     {
         this.InitTeamConifg();
+        MercenariesHelper.MercenariesHelper.BattleQueue.Clear();
         ZonePlay friendlyZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.FRIENDLY);
         MercenariesHelper.MercenariesHelper.Battles battles = new MercenariesHelper.MercenariesHelper.Battles();
 

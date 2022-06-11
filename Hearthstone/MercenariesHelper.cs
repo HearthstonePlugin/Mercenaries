@@ -1094,7 +1094,7 @@ namespace MercenariesHelper
                         return;
                     }
                     //UnityEngine.Debug.Log("是否选择佣兵");
-                    if (BattleQueue.Count > 0 && battles.Ability == null)
+                    if (BattleQueue.Count > 0)
                     {
                         //Debug.Log("BattleQueue数量：" + BattleQueue.Count);
                         battles = BattleQueue.Dequeue();
