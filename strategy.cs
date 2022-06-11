@@ -13,6 +13,15 @@ public class Strategy
     private List<string> ignoreNames = new List<string>();
     private void InitTeamConifg()
     {
+        AttackAbility.Clear();
+        AbilityTargetType.Clear();
+        AttackTaunt.Clear();
+        AttackStrategy.Clear();
+        FirstAttack.Clear();
+        heroNames.Clear();
+        FirstHeroNames.Clear();
+        ignoreNames.Clear();
+
         string teamConfigPath = @"BepInEx\config\MercenaryTeam.cfg";
 
         if (!System.IO.File.Exists(@teamConfigPath))
@@ -240,6 +249,7 @@ public class Strategy
             }
 
         }
+        this.InitTeamConifg();
     }
 
     private Entity HandleCard(int idx, TAG_ROLE myRole)
