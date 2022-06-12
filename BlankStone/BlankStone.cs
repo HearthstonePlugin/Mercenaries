@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace BlankStone
 {
-    [BepInPlugin("BlankStone", "佣兵挂机插件", "1.0.3.0")]
+    [BepInPlugin("BlankStone", "BepInPluginTemplate", "1.0.3.0")]
     public class BlankStone : BaseUnityPlugin
     {
         public static string logPath = @"BepInEx\BlankStone.log";
