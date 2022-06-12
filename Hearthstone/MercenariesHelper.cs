@@ -18,7 +18,8 @@ namespace MercenariesHelper
 
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
-        public static float FindingGameTime;
+        public static bool isFinding = false;
+        public static float FindingGameTime = 0f;
         public static float sleeptime;
         public static bool fakeClick;
         public static bool fakeClickDown;
@@ -287,7 +288,7 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("PatchReportCaughtException");
             harmony.Patch(method1, new HarmonyMethod(method2));
 
-            if (!isViewCount)
+            if (!isViewCount || enableAutoPlay)
             {
                 Debug.Log("屏蔽推销");
                 method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("GetViewCount");    // 屏蔽推销
@@ -680,12 +681,17 @@ namespace MercenariesHelper
                 GameState gameState = GameState.Get();
                 if (gameMgr.IsFindingGame())
                 {
-                    //float tmptime = Time.realtimeSinceStartup - FindingGameTime;
+                    if ((isFinding == false) || (FindingGameTime == 0f))
+                    {
+                        FindingGameTime = Time.realtimeSinceStartup;
+                    }
+                    isFinding = true;
+                    float tmptime = Time.realtimeSinceStartup - FindingGameTime;
                     ////UnityEngine.Debug.Log("正在匹配,耗时: " + tmptime + " 秒");
-                    //if (tmptime > 300)    //匹配时间超过300秒则重启游戏
-                    //{
-                    //    Application.Quit();
-                    //}
+                    if (tmptime > 666)    //匹配时间超过666秒则重启游戏
+                    {
+                        Application.Quit();
+                    }
                     sleeptime += 1f;
                     HandleQueueOK = true;
                     EntranceQueue.Clear();
@@ -695,6 +701,7 @@ namespace MercenariesHelper
                     开始时间.Value = StartTime;
                     return;
                 }
+                else { isFinding = false; FindingGameTime = 0f; }
 
                 if (gameType == GameType.GT_UNKNOWN && (scenemode == SceneMgr.Mode.LETTUCE_VILLAGE || scenemode == SceneMgr.Mode.LETTUCE_PLAY) && gameState == null)
                 {
@@ -977,6 +984,7 @@ namespace MercenariesHelper
                     Traverse.Create(InputManager.Get()).Method("DoNetworkOptionTarget", new object[] { battles.target }).GetValue();
                     battles.Ability = null;
                     battles.target = null;
+                    Resetidle();
                     return;
                 }
                 ZonePlay enemyPlayZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.OPPOSING);
@@ -1088,6 +1096,7 @@ namespace MercenariesHelper
                     ZonePlay enemyPlayZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.OPPOSING);
                     if (enemyPlayZone.GetCardCount() == 1 && enemyPlayZone.GetFirstCard().GetEntity().IsStealthed())    //如果敌方只有一个并且隐藏则直接回合结束
                     {
+                        Resetidle();
                         InputManager.Get().DoEndTurnButton();
                         return;
                     }
@@ -1118,6 +1127,7 @@ namespace MercenariesHelper
                             {
                                     Debug.Log("Ability：" + battles.Ability);
                             }
+                            Resetidle();
                         }
                         if (battles.target == null)
                         {
