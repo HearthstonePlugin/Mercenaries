@@ -33,8 +33,9 @@ public class Strategy
             TeamConifg += "凯恩·血蹄-321-220\n";
             TeamConifg += "迪亚波罗-231-200-001\n";
             TeamConifg += "希奈丝特拉-231-110\n";
-            TeamConifg += "# 优先技能英雄，同速先发，仅支持设置一个\n";
+            TeamConifg += "# 优先技能英雄，同速先发\n";
             TeamConifg += "+瓦尔登·晨拥\n";
+            TeamConifg += "+迪亚波罗\n";
             TeamConifg += "# 忽略上场（跳过衍生物）\n";
             TeamConifg += "-小型魔像\n";
             TeamConifg += "# 优先目标，如果有则覆盖默认策略，当技能指向为0时，执行。以>开头填写，无空格\n";
@@ -52,7 +53,7 @@ public class Strategy
             TeamConifg += ">沃金\n";
             TeamConifg += ">迦顿男爵\n";
             System.IO.File.WriteAllText(@teamConfigPath, TeamConifg);
-            System.Diagnostics.Process.Start("explorer.exe", @"BepInEx\config\");
+            //System.Diagnostics.Process.Start("explorer.exe", @"BepInEx\config\");
         }
 
 
@@ -134,48 +135,7 @@ public class Strategy
         ZonePlay friendlyZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.FRIENDLY);
         MercenariesHelper.MercenariesHelper.Battles battles = new MercenariesHelper.MercenariesHelper.Battles();
 
-        if (FirstHeroNames.Count != 0)
-        {
-            foreach (Card card in friendlyZone.GetCards())
-            {
-                string firendlyCardName = card.GetEntity().GetName();
-                if (firendlyCardName == FirstHeroNames[0])
-                {
-                    for (int i = 0; i < heroNames.Count; i++)
-                    {
-                        if (heroNames[i] == FirstHeroNames[0])
-                        {
-                            if (i==0)
-                            {
-                                goto findFirstHero;
-                            }
-
-                            string tempAttackAbility = AttackAbility[i];
-                            string tempAbilityTargetType = AbilityTargetType[i];
-                            string tempAttackStrategy = AttackStrategy[i];
-                            bool tempAttackTaunt = AttackTaunt[i];
-                            
-                            AttackAbility[i] = AttackAbility[0];
-                            AbilityTargetType[i] = AbilityTargetType[0];
-                            AttackStrategy[i] = AttackStrategy[0];
-                            AttackTaunt[i] = AttackTaunt[0];
-                            heroNames[i] = heroNames[0];
-
-                            AttackAbility[0] = tempAttackAbility;
-                            AbilityTargetType[0] = tempAbilityTargetType;
-                            AttackStrategy[0] = tempAttackStrategy;
-                            AttackTaunt[0] = tempAttackTaunt;
-                            heroNames[0] = FirstHeroNames[0];
-
-                            goto findFirstHero;
-                        }
-                    }
-                }
-            }
-
-        findFirstHero:
-            ;
-        }
+        this.SortName(friendlyZone);
 
         for (int i = 0; i < heroNames.Count; i++)
         {
@@ -252,6 +212,46 @@ public class Strategy
         this.InitTeamConifg();
     }
 
+    private void SortName(ZonePlay zonePlay)
+    {
+        for (int j = 0; j < FirstHeroNames.Count; j++)
+        {
+            foreach (Card card in zonePlay.GetCards())
+            {
+                string firendlyCardName = card.GetEntity().GetName();
+                if (firendlyCardName == FirstHeroNames[j])
+                {
+                    for (int i = j + 1; i < heroNames.Count; i++)
+                    {
+                        if (heroNames[i] == FirstHeroNames[j])
+                        {
+                            string tempAttackAbility = AttackAbility[i];
+                            string tempAbilityTargetType = AbilityTargetType[i];
+                            string tempAttackStrategy = AttackStrategy[i];
+                            bool tempAttackTaunt = AttackTaunt[i];
+
+                            AttackAbility[i] = AttackAbility[j];
+                            AbilityTargetType[i] = AbilityTargetType[j];
+                            AttackStrategy[i] = AttackStrategy[j];
+                            AttackTaunt[i] = AttackTaunt[j];
+                            heroNames[i] = heroNames[j];
+
+                            AttackAbility[j] = tempAttackAbility;
+                            AbilityTargetType[j] = tempAbilityTargetType;
+                            AttackStrategy[j] = tempAttackStrategy;
+                            AttackTaunt[j] = tempAttackTaunt;
+                            heroNames[j] = FirstHeroNames[j];
+
+                            goto findFirstHero;
+                        }
+                    }
+                }
+            }
+
+        findFirstHero:
+            continue;
+        }
+    }
     private Entity HandleCard(int idx, TAG_ROLE myRole)
     {
         ZonePlay opposingZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.OPPOSING);

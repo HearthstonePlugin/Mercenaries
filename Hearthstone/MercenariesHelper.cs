@@ -656,10 +656,28 @@ namespace MercenariesHelper
             {
                 LogTeamAndBoss();
                 System.Diagnostics.Process.Start("explorer.exe", @loginfo);
+                System.Diagnostics.Process.Start("explorer.exe", @"BepInEx\config\");
                 Resetidle();
                 UIStatus.Get().AddInfo("运行状态：" + (enableAutoPlay ? "运行" : "停止"));
             }
-
+            if (Input.GetKeyUp(KeyCode.F6))
+            {
+                Debug.Log("$\"Update -> Setting disabled from renderer {renderer.transform.name}\"");
+                foreach (var renderer in FindObjectsOfType<Renderer>())
+                {
+                    if (renderer != null) renderer.enabled = false;
+                    //if (renderer.material != null) renderer.material = null;
+                }
+            }
+            if (Input.GetKeyUp(KeyCode.F7))
+            {
+                Debug.Log("$\"Update -> Removing material from renderer {renderer.transform.name}\"");
+                foreach (var renderer in FindObjectsOfType<Renderer>())
+                {
+                    if (renderer != null) renderer.enabled = false;
+                    if (renderer.material != null) renderer.material = null;
+                }
+            }
             if ((Time.realtimeSinceStartup - sleeptime) > 1)      //
             {
                 sleeptime = Time.realtimeSinceStartup;
