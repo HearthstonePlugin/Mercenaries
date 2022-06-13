@@ -1,4 +1,4 @@
-# [炉石传说佣兵挂机插件](https://github.com/Pik-4/HS_MRC_BepInEx)
+# [炉石传说佣兵挂机插件](https://github.com/Pik-4/Hearthstone_Mercenaries_BepInEx)
 
 **Author: Pik4; Original Author: zyz2000**
 
