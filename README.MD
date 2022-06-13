@@ -30,6 +30,15 @@
 
 [BepInPluginTemplate](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/BepInPluginTemplate.sln) BepInEx插件开发模板
 
+
+### 编译说明
+
+1. 安装`Visual Studio`，安装`C#`相关功能。
+2. 打开`MercenariesHelper.sln`，添加引用，尝试编译，直到报错不缺引用(智能提示不提示`using`)为止。
+3. 编译`strategy.sln`，编译策略时需要`MercenariesHelper.dll`，故2、3顺序固定。
+
+注：引用优先在`Bepinex\unstripped_corlib`，其次在`%PROGRAMFILES(x86)%\Hearthstone\Hearthstone_Data\Managed`中查找。结合`MercenariesHelper.csproj`分析即可。
+
 ### 安装说明
 
 1. 分别编译`MercenariesHelper`与`strategy`。
