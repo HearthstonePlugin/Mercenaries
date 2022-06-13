@@ -1,21 +1,20 @@
 # [炉石传说佣兵挂机插件](https://github.com/Pik-4/HS_MRC_BepInEx)
 
-#### Author: Pik4; Original Author: zyz2000
+**Author: Pik4; Original Author: zyz2000**
 
 基于[BepInEx](https://github.com/BepInEx/BepInEx)开发的炉石传说佣兵战纪插件，推荐和[MixMod](https://4pda.to/forum/index.php?showtopic=870696)搭配使用。
+
+### 免责声明
+使用辅助进行游戏的行为违反了暴雪用户协议 1.C.ii.2 使用机器人程序软件（BOT）： 任何未经暴雪和/或运营方明确授权，允许自动控制游戏，服务器和/或任何组件或其功能的的代码或/和软件，如自动操控游戏中的角色；因此根据协议，暴雪和/或运营方可以暂停、撤销或终止您使用本平台或本平台的部分功能或组成部分的许可。 
+本项目仅用作`C#`的学习研究，由于使用该项目导致账号被封禁，本人不承担任何责任。如果该插件的开源分享行为损害了暴雪/运营方的利益，请联系我停止更新/删库，我会全力配合。 
 
 ### 文件、目录说明
 
 [MercenariesHelper.sln](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/MercenariesHelper.sln) 主程序解决方案
-
 [strategy.sln](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/strategy.sln) 策略解决方案
-
 [binaryFile](https://github.com/Pik-4/HS_MRC_BepInEx/tree/main/binaryFile) 预编译的主程序以及策略文件
-
 [teamConifg](https://github.com/Pik-4/HS_MRC_BepInEx/tree/main/teamConifg) 一些策略，目前主要用作PVP（PVE也可使用）
-
 [zyz2000-mercenary](https://github.com/Pik-4/HS_MRC_BepInEx/tree/main/zyz2000-mercenary) 原始项目
-
 [BepInPluginTemplate](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/BepInPluginTemplate.sln) BepInEx插件开发模板
 
 ### 安装说明
@@ -54,3 +53,11 @@
 9. 自动推图（火焰队按顺序解锁未解锁的关卡，考虑做瓦莉拉任务。）
 10. 增加任务处理体系（长时间进度不变时，将佣兵加入黑名单，并自动放弃任务）。
 11. 定向优化PVE任务（技能类别，斩杀指定类型随从）。
+
+### 问题处理
+
+如果有问题请提交Issues。
+
+### 加入该项目
+
+当您的第一个PR通过后，我会邀请您加入该项目，成为collaborator。
