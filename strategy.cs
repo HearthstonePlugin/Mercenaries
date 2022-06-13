@@ -3,6 +3,32 @@ using System.Collections.Generic;
 
 public class Strategy
 {
+    private enum COOLDOWN { YES, NO, UNKNOWN };
+    private struct AbilityLinkage
+    {
+        public string Hero;
+        public int Willing;
+        public int Ability;
+        public COOLDOWN Cooldown;
+
+    };
+
+    //struct MercenaryStrategy
+    //{
+    //    public bool Crit;
+    //    public bool TargetHealthMin; // ture攻击生命值最低；false最高;
+    //    public int AbilityLinkageIndex;
+    //}
+    //struct Mercenary
+    //{
+    //    public string Name;
+    //    public int[] Ability;
+    //    public int[] WillingAbility;
+    //    public int[] WillingTargetType;
+    //    public MercenaryStrategy AttackStrategy;
+    //};
+
+
     private List<string> AttackAbility = new List<string>();    // 不考虑抉择
     private List<string> AbilityTargetType = new List<string>();
     private List<bool> AttackTaunt = new List<bool>();
@@ -11,6 +37,9 @@ public class Strategy
     private List<string> heroNames = new List<string>();
     private List<string> FirstHeroNames = new List<string>();
     private List<string> ignoreNames = new List<string>();
+    private List<AbilityLinkage> AbilityWithAnother = new List<AbilityLinkage>();
+    private List<int> AbilityWithAnotherIndex = new List<int>();
+
     private void InitTeamConifg()
     {
         AttackAbility.Clear();
@@ -21,23 +50,28 @@ public class Strategy
         heroNames.Clear();
         FirstHeroNames.Clear();
         ignoreNames.Clear();
+        AbilityWithAnotherIndex.Clear();
+        AbilityWithAnother.Clear();
 
         string teamConfigPath = @"BepInEx\config\MercenaryTeam.cfg";
 
         if (!System.IO.File.Exists(@teamConfigPath))
         {
-            string TeamConifg = "# 佣兵名称-技能顺序-技能指向（默认=>0敌方，1自己，2无指向（尝试指向敌方0）,与设定技能顺序对应）-策略（暴击/攻击最大生命值/攻击最小生命值，默认101）-强制嘲讽优先（缺省0=>false）\n";
+            string TeamConifg = "# 佣兵名称-技能顺序-技能指向（默认=>0敌方，1自己，2无指向（尝试指向敌方0）,与设定技能顺序对应）-策略（暴击/攻击最大生命值/攻击最小生命值，默认101）-强制嘲讽优先（缺省0=>false）-默认1技能联动（缺省0=>不联动）\n";
             TeamConifg += "瓦尔登·晨拥-213-222\n";    // 技能index需要-1
             TeamConifg += "冰雪之王洛克霍拉-123-222\n";
             TeamConifg += "吉安娜·普罗德摩尔-213-000-101\n";
-            TeamConifg += "凯恩·血蹄-321-220\n";
+            TeamConifg += "凯恩·血蹄-323-220-001-0-1\n";
             TeamConifg += "迪亚波罗-231-200-001\n";
-            TeamConifg += "希奈丝特拉-231-110\n";
+            TeamConifg += "希奈丝特拉-232-110-101-1-2\n";
             TeamConifg += "# 优先技能英雄，同速先发\n";
             TeamConifg += "+瓦尔登·晨拥\n";
             TeamConifg += "+迪亚波罗\n";
             TeamConifg += "# 忽略上场（跳过衍生物）\n";
             TeamConifg += "-小型魔像\n";
+            TeamConifg += "# 技能联动列表（第一个的index为1，格式英雄-技能顺序）。如果不能联动，则执行技能顺序2\n";
+            TeamConifg += "~迪亚波罗-2\n";
+            TeamConifg += "~迪亚波罗-3\n";
             TeamConifg += "# 优先目标，如果有则覆盖默认策略，当技能指向为0时，执行。以>开头填写，无空格\n";
             TeamConifg += ">玛法里奥·怒风\n";
             TeamConifg += ">冰雪之王洛克霍拉\n";
@@ -75,6 +109,21 @@ public class Strategy
                 ignoreNames.Add(line.Substring(1));
                 continue;
             }
+            if (line[0] == '~')
+            {
+                string lineCopy = line.Substring(1);
+                string[] lineSplit0 = lineCopy.Split('-');
+                if (lineSplit0.Length == 2)
+                {
+                    AbilityLinkage abilityLinkage;
+                    abilityLinkage.Hero = lineSplit0[0];
+                    abilityLinkage.Willing = int.Parse(lineSplit0[1]);
+                    abilityLinkage.Ability = -1;
+                    abilityLinkage.Cooldown = COOLDOWN.UNKNOWN;
+                    AbilityWithAnother.Add(abilityLinkage);
+                }
+                continue;
+            }
             string[] lineSplit = line.Split('-'); // 分割配置
             if (lineSplit.Length > 0)
             {
@@ -86,6 +135,8 @@ public class Strategy
                 else AttackStrategy.Add("101");
                 if (lineSplit.Length == 5) AttackTaunt.Add(lineSplit[4] == "1");
                 else AttackTaunt.Add(false);
+                if (lineSplit.Length == 6) AbilityWithAnotherIndex.Add(int.Parse(lineSplit[5]));
+                else AbilityWithAnotherIndex.Add(0);
             }
         }
     }
@@ -106,7 +157,7 @@ public class Strategy
 
             foreach (string hero in heroNames)
             {
-                foreach(string ignoreName in ignoreNames)
+                foreach (string ignoreName in ignoreNames)
                 {
                     if (ignoreName == hero) goto tagContinue;
                 }
@@ -159,14 +210,28 @@ public class Strategy
                     //Console.Write(heroNames[i]);
                     //Console.Write("\t挑选技能");
 
+
                     Entity CurrentAbility = GameState.Get().GetEntity(AttackAbility1);
                     CurrentAbilityCount = 1;
-                    if (CurrentAbility.GetTag(GAME_TAG.LETTUCE_CURRENT_COOLDOWN) != 0)
+
+                    if ((CurrentAbility.GetTag(GAME_TAG.LETTUCE_CURRENT_COOLDOWN) != 0))
                     {
                         //Console.WriteLine("第一优先技能存在CD，尝试更换!");
                         CurrentAbility = GameState.Get().GetEntity(AttackAbility2);
                         CurrentAbilityCount = 2;
                     }
+
+                    if (AbilityWithAnotherIndex[i] > 0)
+                    {
+                        this.UpdateAbiliyLinkageStruct(friendlyZone);
+                        COOLDOWN status = AbilityWithAnother[AbilityWithAnotherIndex[i] - 1].Cooldown; // 如果技能存在冷却，或状态未知，优先执行二技能
+                        if (status != COOLDOWN.NO)
+                        {
+                            CurrentAbility = GameState.Get().GetEntity(AttackAbility2);
+                            CurrentAbilityCount = 2;
+                        }
+                    }
+
                     if (CurrentAbility.GetTag(GAME_TAG.LETTUCE_CURRENT_COOLDOWN) != 0)
                     {
                         //Console.WriteLine("第二优先技能存在CD，尝试更换！");
@@ -212,6 +277,32 @@ public class Strategy
         this.InitTeamConifg();
     }
 
+    private void UpdateAbiliyLinkageStruct(ZonePlay zonePlay)
+    {
+        for (int i=0;i<AbilityWithAnother.Count;i++)
+        {
+            AbilityLinkage abilityLinkageCopy = AbilityWithAnother[i];
+            if (abilityLinkageCopy.Ability == -1)
+            {
+                foreach (Card card in zonePlay.GetCards())
+                {
+                    string firendlyCardName = card.GetEntity().GetName();
+                    if (firendlyCardName == abilityLinkageCopy.Hero)
+                    {
+                        List<int> lettuceAbilityEntityIDs = card.GetEntity().GetLettuceAbilityEntityIDs();
+                        abilityLinkageCopy.Ability = lettuceAbilityEntityIDs[abilityLinkageCopy.Willing - 1];
+                        Entity CurrentAbility = GameState.Get().GetEntity(abilityLinkageCopy.Ability);
+                        abilityLinkageCopy.Cooldown = CurrentAbility.GetTag(GAME_TAG.LETTUCE_CURRENT_COOLDOWN) == 0 ? COOLDOWN.NO : COOLDOWN.YES;
+                        AbilityWithAnother[i] = abilityLinkageCopy;
+                        goto nextAbilityWithAnother;
+                    }
+                }
+            }
+        nextAbilityWithAnother:
+            continue;
+        }
+    }
+
     private void SortName(ZonePlay zonePlay)
     {
         for (int j = 0; j < FirstHeroNames.Count; j++)
@@ -229,18 +320,21 @@ public class Strategy
                             string tempAbilityTargetType = AbilityTargetType[i];
                             string tempAttackStrategy = AttackStrategy[i];
                             bool tempAttackTaunt = AttackTaunt[i];
+                            int tempAbilityWithAnotherIndex = AbilityWithAnotherIndex[i];
 
                             AttackAbility[i] = AttackAbility[j];
                             AbilityTargetType[i] = AbilityTargetType[j];
                             AttackStrategy[i] = AttackStrategy[j];
                             AttackTaunt[i] = AttackTaunt[j];
                             heroNames[i] = heroNames[j];
+                            AbilityWithAnotherIndex[i] = AbilityWithAnotherIndex[j];
 
                             AttackAbility[j] = tempAttackAbility;
                             AbilityTargetType[j] = tempAbilityTargetType;
                             AttackStrategy[j] = tempAttackStrategy;
                             AttackTaunt[j] = tempAttackTaunt;
                             heroNames[j] = FirstHeroNames[j];
+                            AbilityWithAnotherIndex[j] = tempAbilityWithAnotherIndex;
 
                             goto findFirstHero;
                         }
