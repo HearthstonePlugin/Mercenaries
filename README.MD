@@ -21,8 +21,8 @@
 ### 安装说明
 
 1. 分别编译`MercenariesHelper`与`strategy`。
-2. 配置`BepInEx`，该部分可以参考[这里]([Клуб мододелов Hearthstone - 4PDA](https://4pda.to/forum/index.php?showtopic=870696&st=4780#entry114865283))。
-  2.1. 下载[BepInEx_x86]([Releases · BepInEx/BepInEx (github.com)](https://github.com/BepInEx/BepInEx/releases))，并将其解压到炉石根目录`Hearthstone\`下。
+2. 配置`BepInEx`，该部分可以参考[这里](https://4pda.to/forum/index.php?showtopic=870696&st=4780#entry114865283)。
+  2.1. 下载[BepInEx_x86](https://github.com/BepInEx/BepInEx/releases)，并将其解压到炉石根目录`Hearthstone\`下。
   2.2. 创建一个目录`Hearthstone\BepInEx\unstripped_corlib\`；下载[Mono](https://unity.bepinex.dev/corlibs/2019.4.37.zip)和[Unity](https://unity.bepinex.dev/libraries/2019.4.37.zip)，并将其解压在该目录。
   2.3. 修改`Hearthstone\doorstop_config.ini`，将`dllSearchPathOverride=` 替换成`dllSearchPathOverride=BepInEx\unstripped_corlib`
 3. 安装BepInEx配置管理[BepInExConfigManager.Mono](https://github.com/sinai-dev/BepInExConfigManager/releases)，解压到`Hearthstone\BepInEx\`即可；进入游戏后`F5`进行相关控制。
