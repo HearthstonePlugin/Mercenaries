@@ -19,10 +19,15 @@
 ### 文件、目录说明
 
 [MercenariesHelper.sln](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/MercenariesHelper.sln) 主程序解决方案
+
 [strategy.sln](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/strategy.sln) 策略解决方案
+
 [binaryFile](https://github.com/Pik-4/HS_MRC_BepInEx/tree/main/binaryFile) 预编译的主程序以及策略文件
+
 [teamConifg](https://github.com/Pik-4/HS_MRC_BepInEx/tree/main/teamConifg) 一些策略，目前主要用作PVP（PVE也可使用）
+
 [zyz2000-mercenary](https://github.com/Pik-4/HS_MRC_BepInEx/tree/main/zyz2000-mercenary) 原始项目
+
 [BepInPluginTemplate](https://github.com/Pik-4/HS_MRC_BepInEx/blob/main/BepInPluginTemplate.sln) BepInEx插件开发模板
 
 ### 安装说明
