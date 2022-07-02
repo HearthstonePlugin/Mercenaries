@@ -16,7 +16,7 @@ namespace MercenariesHelper
     [BepInPlugin("MercenariesHelper", "佣兵挂机插件", "1.0.3.0")]
     public class MercenariesHelper : BaseUnityPlugin
     {
-
+        public static bool Build4Public = true;
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
         public static bool isFinding = false;
@@ -285,6 +285,55 @@ namespace MercenariesHelper
             method1 = typeof(EnemyEmoteHandler).GetMethod("IsSquelched");       //屏蔽表情
             method2 = typeof(MercenariesHelper).GetMethod("O");
             harmony.Patch(method1, new HarmonyMethod(method2));
+
+            // build public
+            if (Build4Public){
+                method1 = typeof(GraphicsResolution).GetMethod("IsAspectRatioWithinLimit");     //分辨率大小
+                method2 = typeof(MercenariesHelper).GetMethod("___");
+                harmony.Patch(method1, new HarmonyMethod(method2), null);
+
+                method1 = typeof(SplashScreen).GetMethod("GetRatingsScreenRegion", BindingFlags.Instance | BindingFlags.NonPublic);     //点击开始界面
+                method2 = typeof(MercenariesHelper).GetMethod("O");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(Hearthstone.ExceptionReporterControl).GetMethod("ExceptionReportInitialize");    // Patch Log report
+                method2 = typeof(MercenariesHelper).GetMethod("PatchExceptionReporterControl");
+                harmony.Patch(method1, new HarmonyMethod(method2), new HarmonyMethod(method2));
+
+
+                method1 = typeof(Blizzard.BlizzardErrorMobile.ExceptionReporter).GetMethod("ReportCaughtException");    // Patch Log report
+                method2 = typeof(MercenariesHelper).GetMethod("PatchReportCaughtException");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                if (!isViewCount || enableAutoPlay)
+                {
+                    Debug.Log("屏蔽推销");
+                    method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("GetViewCount");    // 屏蔽推销
+                    method2 = typeof(MercenariesHelper).GetMethod("PatchGetViewCount");
+                    harmony.Patch(method1, new HarmonyMethod(method2));
+
+                    method1 = typeof(Hearthstone.InGameMessage.UI.MessagePopupDisplay).GetMethod("GetMessageCount");    // 屏蔽推销
+                    method2 = typeof(MercenariesHelper).GetMethod("PatchGetMessageCount");
+                    harmony.Patch(method1, new HarmonyMethod(method2));
+
+                    method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("Serialize", BindingFlags.Instance | BindingFlags.NonPublic);
+                    method2 = typeof(MercenariesHelper).GetMethod("PatchViewCountController");
+                    harmony.Patch(method1, new HarmonyMethod(method2));
+
+                    method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("Deserialize", BindingFlags.Instance | BindingFlags.NonPublic);
+                    method2 = typeof(MercenariesHelper).GetMethod("PatchViewCountController");
+                    harmony.Patch(method1, new HarmonyMethod(method2));
+
+                    method1 = typeof(Hearthstone.InGameMessage.UI.MessagePopupDisplay).GetMethod("DisplayIGMMessage");
+                    method2 = typeof(MercenariesHelper).GetMethod("PatchDisplayIGMMessage");
+                    harmony.Patch(method1, null, new HarmonyMethod(method2));
+
+
+                }
+
+
+            }
+
 
             Logger.LogWarning($"Patched {harmony.GetPatchedMethods().Count()} methods");
         }
@@ -640,7 +689,7 @@ namespace MercenariesHelper
             }
             if (Input.GetKeyUp(KeyCode.F10))
             {
-             //   LogTeamAndBoss();
+                if (Build4Public) LogTeamAndBoss();
                 System.Diagnostics.Process.Start("explorer.exe", @loginfo);
                 System.Diagnostics.Process.Start("explorer.exe", @"BepInEx\config\");
                 Resetidle();
