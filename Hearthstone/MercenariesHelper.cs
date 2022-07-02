@@ -9,6 +9,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MercenariesHelper
 {
@@ -31,6 +32,7 @@ namespace MercenariesHelper
         public static float fakeMouseY;
         //private static float queuetimer;
         //private static IntPtr WindowHandle;
+        public static BepInEx.Configuration.ConfigEntry<bool> PluginStatus;
         public static BepInEx.Configuration.ConfigEntry<bool> autorun;
         public static BepInEx.Configuration.ConfigEntry<bool> 商店推销;
         public static BepInEx.Configuration.ConfigEntry<bool> 只打电脑;
@@ -128,7 +130,7 @@ namespace MercenariesHelper
         void Awake()
         {
             // 使用Debug.Log()方法来将文本输出到控制台
-            Debug.Log("Enabled!!!");
+            // Debug.Log("Enabled!!!");
         }
 
 
@@ -138,6 +140,12 @@ namespace MercenariesHelper
             path = @"BepInEx\idleTime.log";
             loginfo = @"BepInEx\Mercenaries.log";
             Config.Clear();                             //上面这一段是清除多余的配置
+            PluginStatus = Config.Bind("配置", "插件状态", true, "是否启用插件（需要重启炉石）");
+            if (!PluginStatus.Value)
+            {
+                OnDestroy();
+                return;
+            }
             autorun = Config.Bind("配置", "AutoRun", false, "是否自动佣兵挂机");
             enableAutoPlay = autorun.Value;
             PVP = Config.Bind("配置", "PVP", false, "PVP或者PVE");
@@ -207,6 +215,10 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("___________");
             harmony.Patch(method1, null, new HarmonyMethod(method2));
 
+            method1 = typeof(RewardBoxesDisplay).GetMethod("OnBonusLootButtonShown", BindingFlags.Instance | BindingFlags.NonPublic);
+            method2 = typeof(MercenariesHelper).GetMethod("PatchBonusLootNextButton");
+            harmony.Patch(method1, null, new HarmonyMethod(method2));
+
             method1 = typeof(RewardBoxesDisplay).GetMethod("RewardPackageOnComplete", BindingFlags.Instance | BindingFlags.NonPublic);
             method2 = typeof(MercenariesHelper).GetMethod("__________");
             harmony.Patch(method1, null, new HarmonyMethod(method2));
@@ -239,9 +251,7 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("____");
             harmony.Patch(method1, new HarmonyMethod(method2), null);
 
-            method1 = typeof(GraphicsResolution).GetMethod("IsAspectRatioWithinLimit");     //分辨率大小
-            method2 = typeof(MercenariesHelper).GetMethod("___");
-            harmony.Patch(method1, new HarmonyMethod(method2), null);
+
 
             method1 = typeof(DialogManager).GetMethod("ShowReconnectHelperDialog");
             method2 = typeof(MercenariesHelper).GetMethod("__");
@@ -259,9 +269,6 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("Phase");
             harmony.Patch(method1, null, new HarmonyMethod(method2));
 
-            method1 = typeof(SplashScreen).GetMethod("GetRatingsScreenRegion", BindingFlags.Instance | BindingFlags.NonPublic);     //点击开始界面
-            method2 = typeof(MercenariesHelper).GetMethod("O");
-            harmony.Patch(method1, new HarmonyMethod(method2));
 
             method1 = typeof(QuestPopups).GetMethod("ShowNextQuestNotification");     //弹出任务框
             method2 = typeof(MercenariesHelper).GetMethod("O");
@@ -279,40 +286,7 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("O");
             harmony.Patch(method1, new HarmonyMethod(method2));
 
-            method1 = typeof(Hearthstone.ExceptionReporterControl).GetMethod("ExceptionReportInitialize");    // Patch Log report
-            method2 = typeof(MercenariesHelper).GetMethod("PatchExceptionReporterControl");
-            harmony.Patch(method1, new HarmonyMethod(method2), new HarmonyMethod(method2));
-
-
-            method1 = typeof(Blizzard.BlizzardErrorMobile.ExceptionReporter).GetMethod("ReportCaughtException");    // Patch Log report
-            method2 = typeof(MercenariesHelper).GetMethod("PatchReportCaughtException");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-            if (!isViewCount || enableAutoPlay)
-            {
-                Debug.Log("屏蔽推销");
-                method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("GetViewCount");    // 屏蔽推销
-                method2 = typeof(MercenariesHelper).GetMethod("PatchGetViewCount");
-                harmony.Patch(method1, new HarmonyMethod(method2));
-
-                method1 = typeof(Hearthstone.InGameMessage.UI.MessagePopupDisplay).GetMethod("GetMessageCount");    // 屏蔽推销
-                method2 = typeof(MercenariesHelper).GetMethod("PatchGetMessageCount");  
-                harmony.Patch(method1, new HarmonyMethod(method2));
-
-                method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("Serialize", BindingFlags.Instance | BindingFlags.NonPublic);
-                method2 = typeof(MercenariesHelper).GetMethod("PatchViewCountController");
-                harmony.Patch(method1, new HarmonyMethod(method2));
-
-                method1 = typeof(Hearthstone.InGameMessage.ViewCountController).GetMethod("Deserialize", BindingFlags.Instance | BindingFlags.NonPublic);
-                method2 = typeof(MercenariesHelper).GetMethod("PatchViewCountController");
-                harmony.Patch(method1, new HarmonyMethod(method2));
-
-                method1 = typeof(Hearthstone.InGameMessage.UI.MessagePopupDisplay).GetMethod("DisplayIGMMessage");
-                method2 = typeof(MercenariesHelper).GetMethod("PatchDisplayIGMMessage");
-                harmony.Patch(method1, null, new HarmonyMethod(method2));
-
-
-            }
+            Logger.LogWarning($"Patched {harmony.GetPatchedMethods().Count()} methods");
         }
         public static bool PatchGetViewCount(ref int __result, string uid)
         {
@@ -597,6 +571,14 @@ namespace MercenariesHelper
             RewardBoxesDisplay.Get().m_DoneButton.TriggerRelease();
         }
 
+        public static void PatchBonusLootNextButton(Spell spell, object userData)  //点击额外奖励按钮
+        {
+            if (!enableAutoPlay) { return; }
+            sleeptime += 2;
+            RewardBoxesDisplay.Get().m_BonusLootNextButton.TriggerPress();
+            RewardBoxesDisplay.Get().m_BonusLootNextButton.TriggerRelease();
+        }
+
         public static bool ShouldShowTreasureSelection(PegasusLettuce.LettuceMap map)
         {
             return map.HasPendingTreasureSelection && map.PendingTreasureSelection.TreasureOptions.Count > 0;
@@ -610,6 +592,10 @@ namespace MercenariesHelper
         // 插件启动后会一直循环执行Update()方法，可用于监听事件或判断键盘按键，执行顺序在Start()后面
         void Update()
         {
+            if (!PluginStatus.Value)
+            {
+                return;
+            }
             idleTime += Time.deltaTime;                     //累计时间
             //if (idleTime > 180f && enableAutoPlay) {   //超过60秒没动作点击屏幕
             //    idleTime = 0;
@@ -654,7 +640,7 @@ namespace MercenariesHelper
             }
             if (Input.GetKeyUp(KeyCode.F10))
             {
-                LogTeamAndBoss();
+             //   LogTeamAndBoss();
                 System.Diagnostics.Process.Start("explorer.exe", @loginfo);
                 System.Diagnostics.Process.Start("explorer.exe", @"BepInEx\config\");
                 Resetidle();
