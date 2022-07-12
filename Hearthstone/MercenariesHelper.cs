@@ -17,6 +17,7 @@ namespace MercenariesHelper
     public class MercenariesHelper : BaseUnityPlugin
     {
         public static bool Build4Public = true;
+        
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
         public static bool isFinding = false;
@@ -1292,7 +1293,9 @@ namespace MercenariesHelper
                     //UnityEngine.Debug.Log("佣兵：" + CollectionManager.Get().GetMercenary((long)visitorRecordByID.MercenaryId, true, true).m_mercName);
                     TaskMercenary.Add(CollectionManager.Get().GetMercenary((long)visitorRecordByID.MercenaryId, true, true).m_mercName);
                     SetAbilityNameFromTaskDescription(taskRecordByID.TaskDescription, visitorRecordByID.MercenaryId);
-                    if (taskRecordByID.TaskDescription.GetString().IndexOf("悬赏") > -1 || taskRecordByID.TaskDescription.GetString().IndexOf("英雄难度首领") > -1)
+                    Hearthstone.DataModels.MercenaryVillageTaskItemDataModel mercenaryVillageTaskItemDataModel = LettuceVillageDataUtil.CreateTaskModelByTaskState(netObject.VisitorStates[i].ActiveTaskState, null, false, false);
+                    if ((taskRecordByID.TaskDescription.GetString().IndexOf("悬赏") > -1 || taskRecordByID.TaskDescription.GetString().IndexOf("英雄难度首领") > -1)
+                        && mercenaryVillageTaskItemDataModel.TaskType == Assets.MercenaryVisitor.VillageVisitorType.STANDARD)
                     {
                         isHaveRewardTask = true;
                     }
@@ -1301,7 +1304,7 @@ namespace MercenariesHelper
                 int numberOfSpecialTasks = LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.SPECIAL);
                 int numberofEventTasks =  LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.EVENT);
                 //int idleslot = currentTierPropertyForBuilding + numberOfSpecialTasks - LettuceVillageDataUtil.VisitorStates.Count;
-                int idleslot = numberofEventTasks + currentTierPropertyForBuilding + numberOfSpecialTasks - netObject.VisitorStates.Count;
+                int idleslot = currentTierPropertyForBuilding + numberofEventTasks + numberOfSpecialTasks - netObject.VisitorStates.Count;
                 //Debug.Log("空闲任务栏：" + idleslot + " isHaveRewardTask:" + isHaveRewardTask);
 
                 if (idleslot > 0) { isHaveRewardTask = false; }
