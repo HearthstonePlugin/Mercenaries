@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace MercenariesHelper
 {
-    [BepInPlugin("MercenariesHelper", "佣兵挂机插件", "1.0.3.0")]
+    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class MercenariesHelper : BaseUnityPlugin
     {
         public static bool Build4Public = true;
@@ -203,25 +203,9 @@ namespace MercenariesHelper
             //method2 = typeof(MercenariesHelper).GetMethod("MouseButtonUp");
             //harmony.Patch(method1, null, new HarmonyMethod(method2));
 
-            MethodInfo method1 = typeof(RewardPopups).GetMethod("ShowMercenariesRewards");
-            MethodInfo method2 = typeof(MercenariesHelper).GetMethod("____________");
-            harmony.Patch(method1, new HarmonyMethod(method2));
+            MethodInfo method1;
+            MethodInfo method2;
 
-            method1 = typeof(MercenariesSeasonRewardsDialog).GetMethod("ShowWhenReady", BindingFlags.Instance | BindingFlags.NonPublic);
-            method2 = typeof(MercenariesHelper).GetMethod("_____________");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-            method1 = typeof(RewardBoxesDisplay).GetMethod("OnDoneButtonShown", BindingFlags.Instance | BindingFlags.NonPublic);
-            method2 = typeof(MercenariesHelper).GetMethod("___________");
-            harmony.Patch(method1, null, new HarmonyMethod(method2));
-
-            method1 = typeof(RewardBoxesDisplay).GetMethod("OnBonusLootButtonShown", BindingFlags.Instance | BindingFlags.NonPublic);
-            method2 = typeof(MercenariesHelper).GetMethod("PatchBonusLootNextButton");
-            harmony.Patch(method1, null, new HarmonyMethod(method2));
-
-            method1 = typeof(RewardBoxesDisplay).GetMethod("RewardPackageOnComplete", BindingFlags.Instance | BindingFlags.NonPublic);
-            method2 = typeof(MercenariesHelper).GetMethod("__________");
-            harmony.Patch(method1, null, new HarmonyMethod(method2));
 
             method1 = typeof(LettuceMap).GetMethod("CreateMapFromProto", BindingFlags.Instance | BindingFlags.Public);
             method2 = typeof(MercenariesHelper).GetMethod("________");
@@ -243,27 +227,6 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("OO");
             harmony.Patch(method1, new HarmonyMethod(method2));
 
-            method1 = typeof(Hearthstone.HearthstoneApplication).GetMethod("OnApplicationFocus", BindingFlags.Instance | BindingFlags.NonPublic);
-            method2 = typeof(MercenariesHelper).GetMethod("_____");
-            harmony.Patch(method1, new HarmonyMethod(method2), null);
-
-            method1 = typeof(AlertPopup).GetMethod("Show");
-            method2 = typeof(MercenariesHelper).GetMethod("____");
-            harmony.Patch(method1, new HarmonyMethod(method2), null);
-
-
-
-            method1 = typeof(DialogManager).GetMethod("ShowReconnectHelperDialog");
-            method2 = typeof(MercenariesHelper).GetMethod("__");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-            method1 = typeof(Network).GetMethod("OnFatalBnetError");
-            method2 = typeof(MercenariesHelper).GetMethod("_");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-            method1 = typeof(ReconnectHelperDialog).GetMethod("Show");
-            method2 = typeof(MercenariesHelper).GetMethod("__");
-            harmony.Patch(method1, new HarmonyMethod(method2));
 
             method1 = typeof(LettuceMissionEntity).GetMethod("ShiftPlayZoneForGamePhase", BindingFlags.Instance | BindingFlags.NonPublic);   //
             method2 = typeof(MercenariesHelper).GetMethod("Phase");
@@ -282,12 +245,55 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("OOOOO");
             harmony.Patch(method1, new HarmonyMethod(method2));
 
-            method1 = typeof(EnemyEmoteHandler).GetMethod("IsSquelched");       //屏蔽表情
-            method2 = typeof(MercenariesHelper).GetMethod("O");
-            harmony.Patch(method1, new HarmonyMethod(method2));
+
 
             // build public
             if (Build4Public){
+                method1 = typeof(Hearthstone.HearthstoneApplication).GetMethod("OnApplicationFocus", BindingFlags.Instance | BindingFlags.NonPublic);
+                method2 = typeof(MercenariesHelper).GetMethod("_____");
+                harmony.Patch(method1, new HarmonyMethod(method2), null);
+
+                method1 = typeof(AlertPopup).GetMethod("Show");
+                method2 = typeof(MercenariesHelper).GetMethod("____");
+                harmony.Patch(method1, new HarmonyMethod(method2), null);
+
+                method1 = typeof(EnemyEmoteHandler).GetMethod("IsSquelched");       //屏蔽表情
+                method2 = typeof(MercenariesHelper).GetMethod("O");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(DialogManager).GetMethod("ShowReconnectHelperDialog");
+                method2 = typeof(MercenariesHelper).GetMethod("__");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(Network).GetMethod("OnFatalBnetError");
+                method2 = typeof(MercenariesHelper).GetMethod("_");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(ReconnectHelperDialog).GetMethod("Show");
+                method2 = typeof(MercenariesHelper).GetMethod("__");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+
+                method1 = typeof(MercenariesSeasonRewardsDialog).GetMethod("ShowWhenReady", BindingFlags.Instance | BindingFlags.NonPublic);
+                method2 = typeof(MercenariesHelper).GetMethod("_____________");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(RewardPopups).GetMethod("ShowMercenariesRewards");
+                method2 = typeof(MercenariesHelper).GetMethod("____________");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(RewardBoxesDisplay).GetMethod("OnDoneButtonShown", BindingFlags.Instance | BindingFlags.NonPublic);
+                method2 = typeof(MercenariesHelper).GetMethod("___________");
+                harmony.Patch(method1, null, new HarmonyMethod(method2));
+
+                method1 = typeof(RewardBoxesDisplay).GetMethod("OnBonusLootButtonShown", BindingFlags.Instance | BindingFlags.NonPublic);
+                method2 = typeof(MercenariesHelper).GetMethod("PatchBonusLootNextButton");
+                harmony.Patch(method1, null, new HarmonyMethod(method2));
+
+                method1 = typeof(RewardBoxesDisplay).GetMethod("RewardPackageOnComplete", BindingFlags.Instance | BindingFlags.NonPublic);
+                method2 = typeof(MercenariesHelper).GetMethod("__________");
+                harmony.Patch(method1, null, new HarmonyMethod(method2));
+
                 method1 = typeof(GraphicsResolution).GetMethod("IsAspectRatioWithinLimit");     //分辨率大小
                 method2 = typeof(MercenariesHelper).GetMethod("___");
                 harmony.Patch(method1, new HarmonyMethod(method2), null);
@@ -1293,7 +1299,9 @@ namespace MercenariesHelper
                 }
                 int currentTierPropertyForBuilding = LettuceVillageDataUtil.GetCurrentTierPropertyForBuilding(Assets.MercenaryBuilding.Mercenarybuildingtype.TASKBOARD, Assets.TierProperties.Buildingtierproperty.TASKSLOTS);
                 int numberOfSpecialTasks = LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.SPECIAL);
-                int idleslot = currentTierPropertyForBuilding + numberOfSpecialTasks - LettuceVillageDataUtil.VisitorStates.Count;
+                int numberofEventTasks =  LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.EVENT);
+                //int idleslot = currentTierPropertyForBuilding + numberOfSpecialTasks - LettuceVillageDataUtil.VisitorStates.Count;
+                int idleslot = numberofEventTasks + currentTierPropertyForBuilding + numberOfSpecialTasks - netObject.VisitorStates.Count;
                 //Debug.Log("空闲任务栏：" + idleslot + " isHaveRewardTask:" + isHaveRewardTask);
 
                 if (idleslot > 0) { isHaveRewardTask = false; }
@@ -1535,10 +1543,10 @@ namespace MercenariesHelper
         public const string PLUGIN_GUID = "MercenariesHelper";
 
         // Token: 0x04000039 RID: 57
-        public const string PLUGIN_NAME = "MercenariesHelper";
+        public const string PLUGIN_NAME = "佣兵挂机插件";
 
         // Token: 0x0400003A RID: 58
-        public const string PLUGIN_VERSION = "1.0.3.0";
+        public const string PLUGIN_VERSION = "1.0.4.0";
     }
 }
 
