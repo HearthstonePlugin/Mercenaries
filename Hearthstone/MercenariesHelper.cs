@@ -1118,7 +1118,7 @@ namespace MercenariesHelper
                                 //Debug.Log(entity);
                                 for (int i = 1; i <= zoneHand.GetCardCount(); i++)
                                 {
-                                    if (entity == zoneHand.GetCardAtPos(i).GetEntity())
+                                    if (entity == zoneHand.GetCardAtSlot(i).GetEntity())
                                     {
                                         SelectedOption = i;
                                     }
@@ -1128,9 +1128,9 @@ namespace MercenariesHelper
                             {
                                 for (int i = 1; i <= zoneHand.GetCardCount(); i++)
                                 {
-                                    if (TaskMercenary.Contains(zoneHand.GetCardAtPos(i).GetEntity().GetName()))
+                                    if (TaskMercenary.Contains(zoneHand.GetCardAtSlot(i).GetEntity().GetName()))
                                     {
-                                        //UnityEngine.Debug.Log("佣兵: " + i + " " + zoneHand.GetCardAtPos(i).GetEntity().GetName());
+                                        //UnityEngine.Debug.Log("佣兵: " + i + " " + zoneHand.GetCardAtSlot(i).GetEntity().GetName());
                                         SelectedOption = i;
                                         break;
                                     }
