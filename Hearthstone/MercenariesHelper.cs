@@ -17,7 +17,7 @@ namespace MercenariesHelper
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class MercenariesHelper : BaseUnityPlugin
     {
-        public static bool Build4Public = true;     // 提交GitHub Release时禁用
+        public static bool Build4Public = true;     // 提交GitHub Release时启用
         
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
