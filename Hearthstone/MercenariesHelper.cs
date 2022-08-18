@@ -11,12 +11,13 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 
+
 namespace MercenariesHelper
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class MercenariesHelper : BaseUnityPlugin
     {
-        public static bool Build4Public = true;
+        public static bool Build4Public = true;     // 提交GitHub Release时禁用
         
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
@@ -52,6 +53,7 @@ namespace MercenariesHelper
         public static BepInEx.Configuration.ConfigEntry<long> 开始时间;
         public static BepInEx.Configuration.ConfigEntry<bool> Hidemain;
         public static BepInEx.Configuration.ConfigEntry<int> 投降延迟;
+        public static BepInEx.Configuration.ConfigEntry<uint> PvpLogMax;
         public static bool 认输;
         public static int concedeDelay;
         public static bool isPVP;
@@ -86,7 +88,13 @@ namespace MercenariesHelper
         public static Queue<Battles> BattleQueue = new Queue<Battles>();
         private static Battles battles;
         private static bool HandleQueueOK = true;
+        
+        public static HashSet<string> TempOppoTeams = new HashSet<string>();
+        public static int PvpWin = 0;
+        public static int PvpLose = 0;
+        public static string PvpLogFile = @"BepInEx\merc.log";
 
+        public static Harmony harmony = new Harmony("MercenariesHelper.patch");
         public struct Battles
         {
             public Entity source;
@@ -127,6 +135,33 @@ namespace MercenariesHelper
             }
         };
 
+        public static List<string> OpposingMercard()
+        {
+            ZonePlay opposingZone = ZoneMgr.Get().FindZoneOfType<ZonePlay>(global::Player.Side.OPPOSING);
+            List<Card> opposingCards = opposingZone.GetCards();
+            List<string> result = new List<string>();
+
+            foreach (Card opposingCard in opposingCards)
+            {
+                foreach (var record in GameDbf.LettuceMercenary.GetRecords())
+                {
+                    foreach (var art in record.MercenaryArtVariations)
+                    {
+                        if (art.CardRecord.Name.GetString() == opposingCard.GetEntity().GetName())
+                        {
+                            
+                            result.Add(opposingCard.GetEntity().GetName()+"-"+ opposingCard.GetEntity().GetEquipmentEntity().GetName());
+                            goto NEXT;
+                        }
+                    }
+                }
+            NEXT:
+                continue;
+            }
+            return result;
+        }
+
+
         // 在插件启动时会直接调用Awake()方法
         void Awake()
         {
@@ -147,6 +182,10 @@ namespace MercenariesHelper
                 OnDestroy();
                 return;
             }
+            PluginStatus.SettingChanged += delegate
+            {
+                OnDestroy();
+            };
             autorun = Config.Bind("配置", "AutoRun", false, "是否自动佣兵挂机");
             enableAutoPlay = autorun.Value;
             PVP = Config.Bind("配置", "PVP", false, "PVP或者PVE");
@@ -172,6 +211,7 @@ namespace MercenariesHelper
             autoConcede = Config.Bind("配置", "投降", false, "是否自动认输");
             认输 = autoConcede.Value;
             投降延迟 = Config.Bind("配置", "投降延迟", 0, "投降延迟（毫秒）");
+            PvpLogMax = Config.Bind("配置", "PVP最大日志条目", uint.Parse("1000"), "PVP最大日志条目");
             concedeDelay = 投降延迟.Value;
 
             Concedeline = Config.Bind("配置", "分数线", 6000, "自动认输分数线，高于此分数自动认输");
@@ -185,7 +225,7 @@ namespace MercenariesHelper
             //GetVer();   //对比sha1，不对则下载
             LoadPolicy();
 
-            Harmony harmony = new Harmony("MercenariesHelper.patch");
+            
             harmony.PatchAll();
 
             //MethodInfo method1 = typeof(InputCollection).GetMethod("GetMousePosition");
@@ -948,19 +988,25 @@ namespace MercenariesHelper
                             PegUIElement hitbox = EndGameScreen.Get().m_hitbox;
                             if (hitbox != null)
                             {
+                                try
+                                {
+                                    LogOppoTeams();
+                                }
+                                catch { }
                                 hitbox.TriggerPress();
                                 hitbox.TriggerRelease();
                                 //AddMouse(Screen.width / 2, (float)(Screen.height / 2.5), 3);
                                 sleeptime += 4;
                                 if (isPVP) { sleeptime += 5; };
                                 Resetidle();   //重置空闲时间
-
+                                
                                 //UnityEngine.Debug.Log("游戏结束，进入酒馆。");
                             }
                         }
                         HandleQueueOK = true;
                         EntranceQueue.Clear();
                         BattleQueue.Clear();
+                        
                     }
                     return;
                 }
@@ -979,6 +1025,86 @@ namespace MercenariesHelper
                 }
                 sleeptime += 1.5f;
             }
+        }
+
+
+        private static void LogOppoTeams()
+        {
+            if(TempOppoTeams.Count==0)
+            {
+                return;
+            }
+
+            int PvpRating = 0;
+            int RatingDelta = 0;
+            var fileq = new QueueList<string>();
+            if (GameState.Get().GetGameEntity() is LettuceMissionEntity)
+            {
+                LettuceMissionEntity lettuceMissionEntity = (LettuceMissionEntity)GameState.Get().GetGameEntity();
+                if (lettuceMissionEntity != null && lettuceMissionEntity.RatingChangeData != null)
+                {
+                    PvpRating = lettuceMissionEntity.RatingChangeData.PvpRating;
+                    RatingDelta = lettuceMissionEntity.RatingChangeData.Delta;
+                }
+
+                if(System.IO.File.Exists(PvpLogFile))
+                {
+                 
+                    uint count = 0;
+                    using (StreamReader streamReader = File.OpenText(@PvpLogFile))
+                    {
+                        string line;
+                        while ((line = streamReader.ReadLine()) != null)
+                        {
+                            if (count < PvpLogMax.Value - 1)
+                            {
+                                fileq.Enqueue(line);
+                            }
+                            else
+                            {
+                                fileq.Dequeue();
+                                fileq.Enqueue(line);
+                            }
+                            count++;
+                        }
+                        streamReader.Close();
+                        streamReader.Dispose();
+                    }
+                }
+
+                string pvplogger;
+                pvplogger = $"{DateTime.Now},";
+                pvplogger += $"{RatingDelta},";
+                pvplogger += $"{PvpRating},";
+                pvplogger += $"{PVPteamName},";
+                try
+                {
+                    var bnetPlayer = BnetPresenceMgr.Get().GetPlayer(GameState.Get().GetOpposingSidePlayer().GetGameAccountId());
+                    string tempFullName = bnetPlayer?.GetBestName();
+                    pvplogger += $"{tempFullName},";
+                }
+                catch
+                {
+                    pvplogger += "&emsp;,";
+                }
+                foreach(var oppo in TempOppoTeams)
+                {
+                    pvplogger += oppo + "\t";
+                }
+                pvplogger += "\n";
+                fileq.Enqueue(pvplogger);
+                foreach(var line in fileq)
+                {
+                    System.IO.File.AppendAllText(@PvpLogFile, line);
+                }
+                fileq.Clear();
+            }
+            else
+            {
+                TempOppoTeams.Clear();
+                return;
+            }
+            TempOppoTeams.Clear();
         }
 
 
@@ -1016,6 +1142,7 @@ namespace MercenariesHelper
         // 在插件关闭时会调用OnDestroy()方法
         void OnDestroy()
         {
+            harmony.UnpatchSelf();
             //if (!File.Exists(Assembly.GetExecutingAssembly().Location + "1")) { GetVer(); }
             //if (File.Exists(Assembly.GetExecutingAssembly().Location + "1"))
             //{
@@ -1033,7 +1160,14 @@ namespace MercenariesHelper
         private static void HandlePlay()
         {
             if (phaseID == 3) { return; }
-
+            try
+            {
+                foreach(var oppo in OpposingMercard())
+                {
+                    TempOppoTeams.Add(oppo);
+                }
+            }
+            catch { }
 
             if (GameState.Get().GetResponseMode() == GameState.ResponseMode.OPTION_TARGET)
             {
@@ -1130,7 +1264,7 @@ namespace MercenariesHelper
                                 {
                                     if (TaskMercenary.Contains(zoneHand.GetCardAtSlot(i).GetEntity().GetName()))
                                     {
-                                        //UnityEngine.Debug.Log("佣兵: " + i + " " + zoneHand.GetCardAtSlot(i).GetEntity().GetName());
+                                        //UnityEngine.Debug.Log("佣兵: " + i + " " + zoneHand.GetCardAtPos(i).GetEntity().GetName());
                                         SelectedOption = i;
                                         break;
                                     }
