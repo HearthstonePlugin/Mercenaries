@@ -1093,6 +1093,7 @@ namespace MercenariesHelper
                 }
                 pvplogger += "\n";
                 fileq.Enqueue(pvplogger);
+                System.IO.File.WriteAllText(@PvpLogFile, "");
                 foreach(var line in fileq)
                 {
                     System.IO.File.AppendAllText(@PvpLogFile, line);
