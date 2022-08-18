@@ -1096,7 +1096,7 @@ namespace MercenariesHelper
                 System.IO.File.WriteAllText(@PvpLogFile, "");
                 foreach(var line in fileq)
                 {
-                    System.IO.File.AppendAllText(@PvpLogFile, line);
+                    System.IO.File.AppendAllText(@PvpLogFile, line+"\n");
                 }
                 fileq.Clear();
             }
