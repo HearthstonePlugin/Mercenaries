@@ -10,14 +10,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
-
+using static Blizzard.T5.Configuration.ConfigFile;
+using Assets;
 
 namespace MercenariesHelper
 {
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class MercenariesHelper : BaseUnityPlugin
     {
-        public static bool Build4Public = true;     // 提交GitHub Release时启用
+        public static bool Build4Public = true;     // 提交GitHub Release时禁用
         
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
@@ -282,7 +283,7 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("OOO");
             harmony.Patch(method1, new HarmonyMethod(method2));
 
-            method1 = typeof(Hearthstone.Progression.RewardTrackManager).GetMethod("UpdateStatus", BindingFlags.Instance | BindingFlags.NonPublic);       //通行证奖励
+            method1 = typeof(Hearthstone.Progression.RewardTrack).GetMethod("UpdateStatus", BindingFlags.Instance | BindingFlags.NonPublic);       //通行证奖励
             method2 = typeof(MercenariesHelper).GetMethod("OOOOO");
             harmony.Patch(method1, new HarmonyMethod(method2));
 
@@ -415,13 +416,13 @@ namespace MercenariesHelper
             return false;
         }
 
-        public static bool OOOOO(int rewardTrackId, int level, Hearthstone.Progression.RewardTrackManager.RewardStatus status, bool forPaidTrack, List<PegasusUtil.RewardItemOutput> rewardItemOutput)      //隐藏通行证奖励
+        public static bool OOOOO(int rewardTrackId, int level, Hearthstone.Progression.RewardTrack.RewardStatus status, bool forPaidTrack, List<PegasusUtil.RewardItemOutput> rewardItemOutput)      //隐藏通行证奖励
         {
             //Debug.Log("通行证弹出奖励");
             if (!enableAutoPlay) { return true; }
-            if (status == Hearthstone.Progression.RewardTrackManager.RewardStatus.GRANTED)
+            if (status == Hearthstone.Progression.RewardTrack.RewardStatus.GRANTED)
             {
-                Hearthstone.Progression.RewardTrackManager.Get().AckRewardTrackReward(rewardTrackId, level, forPaidTrack);
+                Hearthstone.Progression.RewardTrackManager.Get().GetCurrentRewardTrack(Global.RewardTrackType.GLOBAL).AckReward(rewardTrackId, level, forPaidTrack);
                 return false;
             }
             return true;
@@ -1056,6 +1057,8 @@ namespace MercenariesHelper
                         string line;
                         while ((line = streamReader.ReadLine()) != null)
                         {
+                            if (line == "\n" || line == "")
+                                continue;
                             if (count < PvpLogMax.Value - 1)
                             {
                                 fileq.Enqueue(line);
@@ -1073,31 +1076,34 @@ namespace MercenariesHelper
                 }
 
                 string pvplogger;
-                pvplogger = $"{DateTime.Now},";
+                pvplogger = $"{String.Join("<br />", DateTime.Now.ToString().Split(' '))},";
                 pvplogger += $"{RatingDelta},";
                 pvplogger += $"{PvpRating},";
                 pvplogger += $"{PVPteamName},";
                 try
                 {
-                    var bnetPlayer = BnetPresenceMgr.Get().GetPlayer(GameState.Get().GetOpposingSidePlayer().GetGameAccountId());
-                    string tempFullName = bnetPlayer?.GetBestName();
-                    pvplogger += $"{tempFullName},";
+                    pvplogger += $"{HsMod.ConfigValue.Get().CacheOpponentFullName},";
+
                 }
                 catch
                 {
                     pvplogger += "&emsp;,";
                 }
+                int k = 0;
                 foreach(var oppo in TempOppoTeams)
                 {
-                    pvplogger += oppo + "\t";
+                    pvplogger += oppo;
+                    k++;
+                    if (k % 6 !=0) pvplogger += "\t";
                 }
                 pvplogger += "\n";
                 fileq.Enqueue(pvplogger);
                 System.IO.File.WriteAllText(@PvpLogFile, "");
-                foreach(var line in fileq)
+                foreach (var line in fileq)
                 {
-                    System.IO.File.AppendAllText(@PvpLogFile, line+"\n");
+                    System.IO.File.AppendAllText(@PvpLogFile, line.TrimEnd('\n')+"\n");
                 }
+                System.IO.File.AppendAllText(@PvpLogFile, "\n");
                 fileq.Clear();
             }
             else
