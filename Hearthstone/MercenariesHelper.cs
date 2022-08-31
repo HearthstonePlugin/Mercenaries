@@ -274,23 +274,20 @@ namespace MercenariesHelper
             method2 = typeof(MercenariesHelper).GetMethod("Phase");
             harmony.Patch(method1, null, new HarmonyMethod(method2));
 
-
-            method1 = typeof(QuestPopups).GetMethod("ShowNextQuestNotification");     //弹出任务框
-            method2 = typeof(MercenariesHelper).GetMethod("O");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-            method1 = typeof(EndGameScreen).GetMethod("ShowMercenariesExperienceRewards", BindingFlags.Instance | BindingFlags.NonPublic);     //战斗结束佣兵升级界面
-            method2 = typeof(MercenariesHelper).GetMethod("OOO");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-            method1 = typeof(Hearthstone.Progression.RewardTrack).GetMethod("UpdateStatus", BindingFlags.Instance | BindingFlags.NonPublic);       //通行证奖励
-            method2 = typeof(MercenariesHelper).GetMethod("OOOOO");
-            harmony.Patch(method1, new HarmonyMethod(method2));
-
-
-
             // build public
             if (Build4Public){
+                method1 = typeof(QuestPopups).GetMethod("ShowNextQuestNotification");     //弹出任务框
+                method2 = typeof(MercenariesHelper).GetMethod("O");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(EndGameScreen).GetMethod("ShowMercenariesExperienceRewards", BindingFlags.Instance | BindingFlags.NonPublic);     //战斗结束佣兵升级界面
+                method2 = typeof(MercenariesHelper).GetMethod("OOO");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
+                method1 = typeof(Hearthstone.Progression.RewardTrack).GetMethod("UpdateStatus", BindingFlags.Instance | BindingFlags.NonPublic);       //通行证奖励
+                method2 = typeof(MercenariesHelper).GetMethod("OOOOO");
+                harmony.Patch(method1, new HarmonyMethod(method2));
+
                 method1 = typeof(Hearthstone.HearthstoneApplication).GetMethod("OnApplicationFocus", BindingFlags.Instance | BindingFlags.NonPublic);
                 method2 = typeof(MercenariesHelper).GetMethod("_____");
                 harmony.Patch(method1, new HarmonyMethod(method2), null);
