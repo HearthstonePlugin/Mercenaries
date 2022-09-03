@@ -18,7 +18,7 @@ namespace MercenariesHelper
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class MercenariesHelper : BaseUnityPlugin
     {
-        public static bool Build4Public = true;     // 提交GitHub Release时禁用
+        public static bool Build4Public = false;     // 如果不使用HsMod，则需要设置为true
         
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
@@ -93,7 +93,7 @@ namespace MercenariesHelper
         public static HashSet<string> TempOppoTeams = new HashSet<string>();
         public static int PvpWin = 0;
         public static int PvpLose = 0;
-        public static string PvpLogFile = @"BepInEx\merc.log";
+        public static string PvpLogFile = @"BepInEx\HsMatch.log";
 
         public static Harmony harmony = new Harmony("MercenariesHelper.patch");
         public struct Battles
