@@ -24,7 +24,7 @@
 
 [binaryFile](https://github.com/Pik-4/Hearthstone_Mercenaries_BepInEx/tree/main/binaryFile) 预编译的主程序以及策略文件
 
-[binaryFile/HsMod.dll](https://github.com/Pik-4/Hearthstone_Mercenaries_BepInEx/tree/main/binaryFile/HsMod.dll) **HsMod**挂机核心组件，用于提升挂机质量。
+[binaryFile/HsMod.dll](https://github.com/Pik-4/Hearthstone_Mercenaries_BepInEx/tree/main/binaryFile/HsMod.dll) **HsMod**，挂机核心组件，用于提升挂机质量。
 
 [teamConifg](https://github.com/Pik-4/Hearthstone_Mercenaries_BepInEx/tree/main/teamConifg) 一些策略，目前主要用作PVP（PVE也可使用）
 
