@@ -68,7 +68,7 @@
 
 ~~HsMod(**H**earth**S**tone**Mod**ify)的WebServer部分，用于显示任务、收藏、开包情况、佣兵养成进度、游戏常量等信息，需要放在`BepInEx\plugins`目录下。默认端口为58744（炉石九键），运行游戏后访问`http://ip:port/`即可，如果在云服务器上，则可能需要放通该端口。游戏内按下`F4`可用于重启该服务。~~
 
-### binaryFile/HsMod.dll
+### [binaryFile/HsMod.dll](https://github.com/HearthstonePlugin/Mercenaries/blob/main/HsMod.md)
 
 HsMod(**H**earth**S**tone**Mod**ify)一个基于BepInEx功能多样的炉石插件。挂机时，需要手动设置AFK模式。
 
