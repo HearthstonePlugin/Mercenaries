@@ -997,8 +997,11 @@ namespace MercenariesHelper
                                 sleeptime += 4;
                                 if (isPVP) { sleeptime += 5; };
                                 Resetidle();   //重置空闲时间
-                                
-                                //UnityEngine.Debug.Log("游戏结束，进入酒馆。");
+                               
+                                if(((DateTime.Now.Ticks / 10000000) - HsMod.ConfigValue.Get().RunningTime) > (3600 * 3))
+                                {
+                                    Application.Quit();    // 运行时间超过三小时自动退出，防止内存溢出
+                                }
                             }
                         }
                         HandleQueueOK = true;
