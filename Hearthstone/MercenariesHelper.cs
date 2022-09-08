@@ -998,7 +998,7 @@ namespace MercenariesHelper
                                 if (isPVP) { sleeptime += 5; };
                                 Resetidle();   //重置空闲时间
                                
-                                if(((DateTime.Now.Ticks / 10000000) - HsMod.ConfigValue.Get().RunningTime) > (3600 * 3))
+                                if(HsMod.ConfigValue.Get().RunningTime > (3600 * 3))
                                 {
                                     Application.Quit();    // 运行时间超过三小时自动退出，防止内存溢出
                                 }
