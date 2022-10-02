@@ -1,17 +1,15 @@
-﻿using System.Reflection;
+﻿using Assets;
 using BepInEx;
-using PegasusShared;
-using UnityEngine;
 using HarmonyLib;
-using System.Collections;
+using PegasusShared;
 using System;
-using System.Threading;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using System.Linq;
-using static Blizzard.T5.Configuration.ConfigFile;
-using Assets;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace MercenariesHelper
 {
@@ -19,7 +17,7 @@ namespace MercenariesHelper
     public class MercenariesHelper : BaseUnityPlugin
     {
         public static bool Build4Public = false;     // 如果不使用HsMod，则需要设置为true
-        
+
         public static bool enableAutoPlay = false;
         public static bool Initialize = false;
         public static bool isFinding = false;
@@ -89,7 +87,7 @@ namespace MercenariesHelper
         public static Queue<Battles> BattleQueue = new Queue<Battles>();
         private static Battles battles;
         private static bool HandleQueueOK = true;
-        
+
         public static HashSet<string> TempOppoTeams = new HashSet<string>();
         public static int PvpWin = 0;
         public static int PvpLose = 0;
@@ -150,8 +148,8 @@ namespace MercenariesHelper
                     {
                         if (art.CardRecord.Name.GetString() == opposingCard.GetEntity().GetName())
                         {
-                            
-                            result.Add(opposingCard.GetEntity().GetName()+"-"+ opposingCard.GetEntity().GetEquipmentEntity().GetName());
+
+                            result.Add(opposingCard.GetEntity().GetName() + "-" + opposingCard.GetEntity().GetEquipmentEntity().GetName());
                             goto NEXT;
                         }
                     }
@@ -226,7 +224,7 @@ namespace MercenariesHelper
             //GetVer();   //对比sha1，不对则下载
             LoadPolicy();
 
-            
+
             harmony.PatchAll();
 
             //MethodInfo method1 = typeof(InputCollection).GetMethod("GetMousePosition");
@@ -275,7 +273,8 @@ namespace MercenariesHelper
             harmony.Patch(method1, null, new HarmonyMethod(method2));
 
             // build public
-            if (Build4Public){
+            if (Build4Public)
+            {
                 method1 = typeof(QuestPopups).GetMethod("ShowNextQuestNotification");     //弹出任务框
                 method2 = typeof(MercenariesHelper).GetMethod("O");
                 harmony.Patch(method1, new HarmonyMethod(method2));
@@ -409,7 +408,7 @@ namespace MercenariesHelper
         }
         public static bool PatchReportCaughtException(string message, string stackTrace)
         {
-            Debug.Log("message:"+message+"\tstackTrace"+stackTrace+"\r\n");
+            Debug.Log("message:" + message + "\tstackTrace" + stackTrace + "\r\n");
             return false;
         }
 
@@ -965,7 +964,7 @@ namespace MercenariesHelper
                         else
                         {
                             if (GameState.Get().GetOpposingPlayers().Count == 1 && isPVP && onlyPC) { GameState.Get().Concede(); }
-                            if (认输 && isPVP && NetCache.Get().GetNetObject<NetCache.NetCacheMercenariesPlayerInfo>().PvpRating > 分数线) {sleeptime+=concedeDelay/1000.0f; GameState.Get().Concede(); }
+                            if (认输 && isPVP && NetCache.Get().GetNetObject<NetCache.NetCacheMercenariesPlayerInfo>().PvpRating > 分数线) { sleeptime += concedeDelay / 1000.0f; GameState.Get().Concede(); }
                             //if (GameUtils.CanConcedeCurrentMission() && isPVP ) {
                             //    投降时间 += 1;
                             //    //UnityEngine.Debug.Log("投降时间: " + 投降时间);
@@ -997,8 +996,8 @@ namespace MercenariesHelper
                                 sleeptime += 4;
                                 if (isPVP) { sleeptime += 5; };
                                 Resetidle();   //重置空闲时间
-                               
-                                if(HsMod.ConfigValue.Get().RunningTime > (3600 * 3))
+
+                                if (HsMod.ConfigValue.Get().RunningTime > (3600 * 3))
                                 {
                                     Application.Quit();    // 运行时间超过三小时自动退出，防止内存溢出
                                 }
@@ -1007,7 +1006,7 @@ namespace MercenariesHelper
                         HandleQueueOK = true;
                         EntranceQueue.Clear();
                         BattleQueue.Clear();
-                        
+
                     }
                     return;
                 }
@@ -1031,7 +1030,7 @@ namespace MercenariesHelper
 
         private static void LogOppoTeams()
         {
-            if(TempOppoTeams.Count==0)
+            if (TempOppoTeams.Count == 0)
             {
                 return;
             }
@@ -1048,9 +1047,9 @@ namespace MercenariesHelper
                     RatingDelta = lettuceMissionEntity.RatingChangeData.Delta;
                 }
 
-                if(System.IO.File.Exists(PvpLogFile))
+                if (System.IO.File.Exists(PvpLogFile))
                 {
-                 
+
                     uint count = 0;
                     using (StreamReader streamReader = File.OpenText(@PvpLogFile))
                     {
@@ -1090,18 +1089,18 @@ namespace MercenariesHelper
                     pvplogger += "&emsp;,";
                 }
                 int k = 0;
-                foreach(var oppo in TempOppoTeams)
+                foreach (var oppo in TempOppoTeams)
                 {
                     pvplogger += oppo;
                     k++;
-                    if (k % 6 !=0) pvplogger += "\t";
+                    if (k % 6 != 0) pvplogger += "\t";
                 }
                 pvplogger += "\n";
                 fileq.Enqueue(pvplogger);
                 System.IO.File.WriteAllText(@PvpLogFile, "");
                 foreach (var line in fileq)
                 {
-                    System.IO.File.AppendAllText(@PvpLogFile, line.TrimEnd('\n')+"\n");
+                    System.IO.File.AppendAllText(@PvpLogFile, line.TrimEnd('\n') + "\n");
                 }
                 System.IO.File.AppendAllText(@PvpLogFile, "\n");
                 fileq.Clear();
@@ -1124,7 +1123,7 @@ namespace MercenariesHelper
                 System.IO.File.AppendAllText(@loginfo, team.Name + "\n");
             }
             System.IO.File.AppendAllText(@loginfo, DateTime.Now.ToLocalTime().ToString() + "\t获取到关卡信息如下：\n");
-            for (int i = 57; i < 300; i++)    // 生成关卡名称
+            for (int i = 57; i <= 57 + GameDbf.LettuceBounty.GetRecords().Count; i++)    // 生成关卡名称
             {
                 LettuceBountyDbfRecord record = GameDbf.LettuceBounty.GetRecord(i);
                 string saveName;
@@ -1169,7 +1168,7 @@ namespace MercenariesHelper
             if (phaseID == 3) { return; }
             try
             {
-                foreach(var oppo in OpposingMercard())
+                foreach (var oppo in OpposingMercard())
                 {
                     TempOppoTeams.Add(oppo);
                 }
@@ -1284,7 +1283,7 @@ namespace MercenariesHelper
                                 gameState.SetSelectedSubOption(-1);
                                 gameState.SetSelectedOptionTarget(0);
                                 gameState.SetSelectedOptionPosition(zonePlay.GetCardCount() + 1);
-                                gameState.SendOption();
+                                gameState?.SendOption();
                                 sleeptime += 0.75f;
                             }
                             return;
@@ -1326,7 +1325,7 @@ namespace MercenariesHelper
                             }
                             catch
                             {
-                                    Debug.Log("Ability：" + battles.Ability);
+                                Debug.Log("Ability：" + battles.Ability);
                             }
                             Resetidle();
                         }
@@ -1425,7 +1424,7 @@ namespace MercenariesHelper
                     }
 
                     VisitorTaskDbfRecord taskRecordByID = LettuceVillageDataUtil.GetTaskRecordByID(netObject.VisitorStates[i].ActiveTaskState.TaskId);
-                    if (taskRecordByID.TaskTitle.GetString().Substring(0, 2) == "故事")
+                    if (taskRecordByID.TaskTitle?.GetString(Locale.zhCN)?.Substring(0, 2) == "故事")
                     {
                         continue;
                     }
@@ -1435,7 +1434,7 @@ namespace MercenariesHelper
                     TaskMercenary.Add(CollectionManager.Get().GetMercenary((long)visitorRecordByID.MercenaryId, true, true).m_mercName);
                     SetAbilityNameFromTaskDescription(taskRecordByID.TaskDescription, visitorRecordByID.MercenaryId);
                     Hearthstone.DataModels.MercenaryVillageTaskItemDataModel mercenaryVillageTaskItemDataModel = LettuceVillageDataUtil.CreateTaskModelByTaskState(netObject.VisitorStates[i].ActiveTaskState, null, false, false);
-                    if ((taskRecordByID.TaskDescription.GetString().IndexOf("悬赏") > -1 || taskRecordByID.TaskDescription.GetString().IndexOf("英雄难度首领") > -1)
+                    if ((taskRecordByID.TaskDescription.GetString(Locale.zhCN)?.IndexOf("悬赏") > -1 || taskRecordByID.TaskDescription.GetString().IndexOf("英雄难度首领") > -1)
                         && mercenaryVillageTaskItemDataModel.TaskType == Assets.MercenaryVisitor.VillageVisitorType.STANDARD)
                     {
                         isHaveRewardTask = true;
@@ -1443,7 +1442,7 @@ namespace MercenariesHelper
                 }
                 int currentTierPropertyForBuilding = LettuceVillageDataUtil.GetCurrentTierPropertyForBuilding(Assets.MercenaryBuilding.Mercenarybuildingtype.TASKBOARD, Assets.TierProperties.Buildingtierproperty.TASKSLOTS);
                 int numberOfSpecialTasks = LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.SPECIAL);
-                int numberofEventTasks =  LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.EVENT);
+                int numberofEventTasks = LettuceVillageDataUtil.GetNumberOfTasksByType(Assets.MercenaryVisitor.VillageVisitorType.EVENT);
                 //int idleslot = currentTierPropertyForBuilding + numberOfSpecialTasks - LettuceVillageDataUtil.VisitorStates.Count;
                 int idleslot = currentTierPropertyForBuilding + numberofEventTasks + numberOfSpecialTasks - netObject.VisitorStates.Count;
                 //Debug.Log("空闲任务栏：" + idleslot + " isHaveRewardTask:" + isHaveRewardTask);
